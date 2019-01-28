@@ -19,7 +19,6 @@ package org.keycloak.social.google;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.broker.oidc.OIDCDiscoveryIdentityProvider;
-import org.keycloak.broker.oidc.OIDCIdentityProvider;
 import org.keycloak.broker.oidc.OIDCIdentityProviderConfig;
 import org.keycloak.broker.provider.AuthenticationRequest;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
@@ -33,31 +32,20 @@ import org.keycloak.representations.JsonWebToken;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
-import java.io.IOException;
 
 /**
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
  */
 public class GoogleIdentityProvider extends OIDCDiscoveryIdentityProvider implements SocialIdentityProvider<OIDCIdentityProviderConfig> {
 
-    public static final String DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configuration\n";
+    private static final String ISSUER = "https://accounts.google.com";
     public static final String DEFAULT_SCOPE = "openid profile email";
-    public static final String AUTH_URL = "https://accounts.google.com/o/oauth2/v2/auth";
-    public static final String TOKEN_URL = "https://oauth2.googleapis.com/token";
-    public static final String PROFILE_URL = "https://openidconnect.googleapis.com/v1/userinfo";
 
     private static final String OIDC_PARAMETER_HOSTED_DOMAINS = "hd";
 
     public GoogleIdentityProvider(KeycloakSession session, GoogleIdentityProviderConfig config) {
         super(session, config);
-        try {
-            discoverConfig(session, config, DISCOVERY_URL);
-        } catch (IOException e) {
-            logger.warn("Unable to discover Google OpenID Config. Using fallback configuration.");
-            config.setAuthorizationUrl(AUTH_URL);
-            config.setTokenUrl(TOKEN_URL);
-            config.setUserInfoUrl(PROFILE_URL);
-        }
+        discoverConfig(config, ISSUER);
     }
 
     @Override

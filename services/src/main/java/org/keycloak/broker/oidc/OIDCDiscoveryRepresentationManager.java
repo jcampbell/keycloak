@@ -17,31 +17,17 @@
 
 package org.keycloak.broker.oidc;
 
+import org.keycloak.broker.provider.OIDCDiscoveryRepresentationProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.protocol.oidc.representations.OIDCConfigurationRepresentation;
-
-import java.io.IOException;
-
 
 /**
  * @author <a href="mailto:james.p.campbell@gmail.com">James Campbell</a>
  */
-public class OIDCDiscoveryIdentityProvider extends OIDCIdentityProvider {
+public class OIDCDiscoveryRepresentationManager {
 
-    public OIDCDiscoveryIdentityProvider(KeycloakSession session, OIDCIdentityProviderConfig config) {
-        super(session, config);
-    }
-
-    protected void discoverConfig(OIDCIdentityProviderConfig config, String issuer) {
-        OIDCConfigurationRepresentation rep = OIDCDiscoveryRepresentationManager.getOIDCConfigurationRepresentation(session, issuer);
-        config.setLogoutUrl(rep.getLogoutEndpoint());
-        config.setAuthorizationUrl(rep.getAuthorizationEndpoint());
-        config.setTokenUrl(rep.getTokenEndpoint());
-        config.setUserInfoUrl(rep.getUserinfoEndpoint());
-        if (rep.getJwksUri() != null) {
-            config.setValidateSignature(true);
-            config.setUseJwksUrl(true);
-            config.setJwksUrl(rep.getJwksUri());
-        }
+    public static OIDCConfigurationRepresentation getOIDCConfigurationRepresentation(KeycloakSession session, String issuer) {
+        OIDCDiscoveryRepresentationProvider representationProvider = session.getProvider(OIDCDiscoveryRepresentationProvider.class);
+        return representationProvider.getOIDCConfigurationRepresentation(issuer);
     }
 }

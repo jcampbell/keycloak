@@ -29,10 +29,7 @@ import java.util.Map;
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
  */
 
-public class OIDCConfigurationRepresentation {
-
-    @JsonProperty("issuer")
-    private String issuer;
+public class OIDCConfigurationRepresentation extends OIDCDiscoveryConfigurationRepresentation {
 
     @JsonProperty("authorization_endpoint")
     private String authorizationEndpoint;
@@ -117,14 +114,6 @@ public class OIDCConfigurationRepresentation {
     private Boolean tlsClientCertificateBoundAccessTokens;
 
     protected Map<String, Object> otherClaims = new HashMap<String, Object>();
-
-    public String getIssuer() {
-        return issuer;
-    }
-
-    public void setIssuer(String issuer) {
-        this.issuer = issuer;
-    }
 
     public String getAuthorizationEndpoint() {
         return authorizationEndpoint;

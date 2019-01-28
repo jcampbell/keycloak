@@ -45,6 +45,10 @@ public interface InfinispanConnectionProvider extends Provider {
     String AUTHORIZATION_REVISIONS_CACHE_NAME = "authorizationRevisions";
     int AUTHORIZATION_REVISIONS_CACHE_DEFAULT_MAX = 20000;
 
+    String OIDC_CONNECT_DISCOVERY_CACHE = "OIDCDiscovery";
+    int OIDC_CONNECT_DISCOVERY_CACHE_DEFAULT_MAX = 10;
+    long OIDC_CONNECT_DISCOVERY_CACHE_DEFAULT_LIFESPAN = 1000 * 60 * 60 * 24 * 7;
+
     String ACTION_TOKEN_CACHE = "actionTokens";
     int ACTION_TOKEN_CACHE_DEFAULT_MAX = -1;
     int ACTION_TOKEN_MAX_IDLE_SECONDS = -1;
