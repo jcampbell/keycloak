@@ -85,6 +85,7 @@ public class InfinispanOIDCDiscoveryRepresentationProviderFactory implements OID
                     // If this provider issuer is in our cache, clear its configuration now.
                     String issuer = updatedProviderModel.getConfig().getOrDefault("issuer", null);
                     if (issuer != null) {
+                        logger.debugf("Removing issuer %s from OIDCDiscovery cache.");
                         representationCache.remove(issuer);
                     }
                     // Leave configurations for deleted providers in the cache to naturally expire.

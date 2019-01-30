@@ -17,6 +17,7 @@
 
 package org.keycloak.broker.oidc;
 
+import org.jboss.logging.Logger;
 import org.keycloak.broker.provider.AbstractIdentityProviderFactory;
 import org.keycloak.broker.provider.OIDCDiscoveryRepresentationProvider;
 import org.keycloak.models.IdentityProviderModel;
@@ -33,6 +34,8 @@ import java.util.Map;
  * @author <a href="mailto:james.p.campbell@gmail.com">James Campbell</a>
  */
 public class OIDCDiscoveryIdentityProviderFactory extends AbstractIdentityProviderFactory<OIDCIdentityProvider> {
+
+    private static final Logger logger = Logger.getLogger(OIDCDiscoveryIdentityProvider.class);
 
     public static final String PROVIDER_ID = "oidc discovery";
 
@@ -57,6 +60,7 @@ public class OIDCDiscoveryIdentityProviderFactory extends AbstractIdentityProvid
     }
 
     protected static Map<String, String> parseOIDCDiscoveryConfig(KeycloakSession session, InputStream inputStream) {
+        logger.debug("Parsing OIDC Discovery config");
         OIDCDiscoveryConfigurationRepresentation discoveryRep;
         try {
             discoveryRep = JsonSerialization.readValue(inputStream, OIDCDiscoveryConfigurationRepresentation.class);

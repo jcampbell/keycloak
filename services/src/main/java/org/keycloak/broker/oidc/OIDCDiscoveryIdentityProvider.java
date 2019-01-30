@@ -17,6 +17,7 @@
 
 package org.keycloak.broker.oidc;
 
+import org.jboss.logging.Logger;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.protocol.oidc.representations.OIDCConfigurationRepresentation;
 
@@ -28,11 +29,14 @@ import java.io.IOException;
  */
 public class OIDCDiscoveryIdentityProvider extends OIDCIdentityProvider {
 
+    protected static final Logger logger = Logger.getLogger(OIDCDiscoveryIdentityProvider.class);
+
     public OIDCDiscoveryIdentityProvider(KeycloakSession session, OIDCIdentityProviderConfig config) {
         super(session, config);
     }
 
     protected void discoverConfig(OIDCIdentityProviderConfig config, String issuer) {
+        logger.debugf("Getting OIDC Configuration for issuer %s", issuer);
         OIDCConfigurationRepresentation rep = OIDCDiscoveryRepresentationManager.getOIDCConfigurationRepresentation(session, issuer);
         config.setLogoutUrl(rep.getLogoutEndpoint());
         config.setAuthorizationUrl(rep.getAuthorizationEndpoint());

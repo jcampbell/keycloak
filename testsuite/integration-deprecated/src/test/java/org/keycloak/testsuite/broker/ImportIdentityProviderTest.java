@@ -179,10 +179,7 @@ public class ImportIdentityProviderTest extends AbstractIdentityProviderModelTes
         assertEquals(true, config.isStoreToken());
         assertEquals("clientId", config.getClientId());
         assertEquals("clientSecret", config.getClientSecret());
-        assertEquals(GoogleIdentityProvider.AUTH_URL, config.getAuthorizationUrl());
-        assertEquals(GoogleIdentityProvider.TOKEN_URL, config.getTokenUrl());
-        assertEquals(GoogleIdentityProvider.PROFILE_URL, config.getUserInfoUrl());
-
+        assertEquals(GoogleIdentityProvider.ISSUER, config.getIssuer());
     }
 
     private void assertSamlIdentityProviderConfig(IdentityProviderModel identityProvider) {
