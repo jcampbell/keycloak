@@ -25,16 +25,16 @@ import java.io.Serializable;
  */
 public class OIDCDiscoveryRepresentationEntry implements Serializable {
 
-    private final int lastRequestTime;
+    private final long lastRequestTime;
 
     private final OIDCConfigurationRepresentation configurationRepresentation;
 
-    public OIDCDiscoveryRepresentationEntry(int lastRequestTime, OIDCConfigurationRepresentation configurationRepresentation) {
+    public OIDCDiscoveryRepresentationEntry(long lastRequestTime, OIDCConfigurationRepresentation configurationRepresentation) {
         this.lastRequestTime = lastRequestTime;
         this.configurationRepresentation = configurationRepresentation;
     }
 
-    public int getLastRequestTime() { return lastRequestTime; }
+    public long getLastRequestTime() { return lastRequestTime; }
 
     public OIDCConfigurationRepresentation getConfigurationRepresentation() { return configurationRepresentation; }
 }

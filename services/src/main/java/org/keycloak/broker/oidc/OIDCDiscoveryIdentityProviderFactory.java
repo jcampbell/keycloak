@@ -61,7 +61,7 @@ public class OIDCDiscoveryIdentityProviderFactory extends AbstractIdentityProvid
         try {
             discoveryRep = JsonSerialization.readValue(inputStream, OIDCDiscoveryConfigurationRepresentation.class);
         } catch (IOException e) {
-            throw new RuntimeException("failed to load openid connect metadata", e);
+            throw new RuntimeException("Failed to load openid connect metadata", e);
         }
         OIDCIdentityProviderConfig config = new OIDCIdentityProviderConfig(new IdentityProviderModel());
         OIDCConfigurationRepresentation rep = OIDCDiscoveryRepresentationManager.getOIDCConfigurationRepresentation(session, discoveryRep.getIssuer());

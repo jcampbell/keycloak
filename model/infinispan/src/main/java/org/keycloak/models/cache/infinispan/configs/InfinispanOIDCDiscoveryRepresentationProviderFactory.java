@@ -20,7 +20,6 @@ package org.keycloak.models.cache.infinispan.configs;
 import org.infinispan.Cache;
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
-import org.keycloak.broker.oidc.OIDCIdentityProviderConfig;
 import org.keycloak.broker.provider.OIDCDiscoveryRepresentationProvider;
 import org.keycloak.broker.provider.OIDCDiscoveryRepresentationProviderFactory;
 import org.keycloak.cluster.ClusterEvent;
@@ -40,28 +39,26 @@ public class InfinispanOIDCDiscoveryRepresentationProviderFactory implements OID
 
     private static final Logger logger = Logger.getLogger(InfinispanOIDCDiscoveryRepresentationProviderFactory.class);
 
-    public static final String PROVIDER_ID = "infinispan";
+    private static final String PROVIDER_ID = "infinispan";
+    private static final String OIDC_DISCOVERY_CLEAR_CACHE_EVENT = "OIDC_DISCOVERY_CLEAR_CACHE_EVENT";
+    private static final long DEFAULT_REFRESH_TIME = 1000 * 60 * 60 * 24 * 3; // Every three days
 
-    public static final String OIDC_DISCOVERY_CLEAR_CACHE_EVENT = "OIDC_DISCOVERY_CLEAR_CACHE_EVENT";
-
-    private volatile Cache<String, OIDCDiscoveryRepresentationEntry> configsCache;
+    private volatile Cache<String, OIDCDiscoveryRepresentationEntry> representationCache;
 
     public InfinispanOIDCDiscoveryRepresentationProvider create(KeycloakSession session) {
         lazyInit(session);
-        return new InfinispanOIDCDiscoveryRepresentationProvider(session, configsCache);
+        return new InfinispanOIDCDiscoveryRepresentationProvider(session, representationCache, DEFAULT_REFRESH_TIME);
     }
 
     private void lazyInit(KeycloakSession session) {
-        if (configsCache == null) {
+        if (representationCache == null) {
             synchronized (this) {
-                if (configsCache == null) {
-                    logger.debug("Initializing OIDC Discovery Client Representation");
-                    this.configsCache = session.getProvider(InfinispanConnectionProvider.class).getCache(InfinispanConnectionProvider.OIDC_CONNECT_DISCOVERY_CACHE);
+                if (representationCache == null) {
+                    logger.info("Initializing OIDC Discovery Client Representation Cache");
+                    this.representationCache = session.getProvider(InfinispanConnectionProvider.class).getCache(InfinispanConnectionProvider.OIDC_CONNECT_DISCOVERY_CACHE);
 
                     ClusterProvider cluster = session.getProvider(ClusterProvider.class);
-                    cluster.registerListener(OIDC_DISCOVERY_CLEAR_CACHE_EVENT, (ClusterEvent event) -> {
-                        configsCache.clear();
-                    });
+                    cluster.registerListener(OIDC_DISCOVERY_CLEAR_CACHE_EVENT, (ClusterEvent event) -> representationCache.clear() );
                 }
             }
         }
@@ -78,22 +75,19 @@ public class InfinispanOIDCDiscoveryRepresentationProviderFactory implements OID
 
             @Override
             public void onEvent(ProviderEvent event) {
-                if (configsCache == null) {
+                if (representationCache == null) {
                     return;
                 }
 
                 if (event instanceof RealmModel.IdentityProviderUpdatedEvent) {
                     RealmModel.IdentityProviderUpdatedEvent eventt = (RealmModel.IdentityProviderUpdatedEvent) event;
                     IdentityProviderModel updatedProviderModel = eventt.getUpdatedIdentityProvider();
-                    if (updatedProviderModel instanceof OIDCIdentityProviderConfig) {
-                        // TODO: Consider allowing a per-issuer invalidation
-                        // OIDCIdentityProviderConfig modell = (OIDCIdentityProviderConfig) updatedProviderModel;
-                        // String issuer = modell.getIssuer();
-                        // InfinispanOIDCDiscoveryRepresentationProvider provider = (InfinispanOIDCDiscoveryRepresentationProvider) eventt.getKeycloakSession().getProvider(OIDCDiscoveryRepresentationProvider.class, getId());
-                        // provider.clearCacheEntry(issuer);
-                        InfinispanOIDCDiscoveryRepresentationProvider provider = (InfinispanOIDCDiscoveryRepresentationProvider) eventt.getKeycloakSession().getProvider(OIDCDiscoveryRepresentationProvider.class, getId());
-                        provider.clearCache();
+                    // If this provider issuer is in our cache, clear its configuration now.
+                    String issuer = updatedProviderModel.getConfig().getOrDefault("issuer", null);
+                    if (issuer != null) {
+                        representationCache.remove(issuer);
                     }
+                    // Leave configurations for deleted providers in the cache to naturally expire.
                 }
             }
         });

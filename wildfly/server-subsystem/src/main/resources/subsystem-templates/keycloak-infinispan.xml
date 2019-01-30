@@ -45,6 +45,7 @@
                     <object-memory size="1000"/>
                     <expiration max-idle="3600000" />
                 </local-cache>
+                <local-cache name="OIDCDiscovery"/>
                 <local-cache name="actionTokens">
                     <object-memory size="-1"/>
                     <expiration max-idle="-1" interval="300000"/>
@@ -99,6 +100,7 @@
                 <distributed-cache name="clientSessions" owners="1"/>
                 <distributed-cache name="offlineClientSessions" owners="1"/>
                 <distributed-cache name="loginFailures" owners="1"/>
+                <distributed-cache name="OIDCDiscovery" owners="1"/>
                 <local-cache name="authorization">
                     <object-memory size="10000"/>
                 </local-cache>

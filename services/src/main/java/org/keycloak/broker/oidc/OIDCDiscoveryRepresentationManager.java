@@ -21,6 +21,8 @@ import org.keycloak.broker.provider.OIDCDiscoveryRepresentationProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.protocol.oidc.representations.OIDCConfigurationRepresentation;
 
+import java.io.IOException;
+
 /**
  * @author <a href="mailto:james.p.campbell@gmail.com">James Campbell</a>
  */
@@ -28,6 +30,8 @@ public class OIDCDiscoveryRepresentationManager {
 
     public static OIDCConfigurationRepresentation getOIDCConfigurationRepresentation(KeycloakSession session, String issuer) {
         OIDCDiscoveryRepresentationProvider representationProvider = session.getProvider(OIDCDiscoveryRepresentationProvider.class);
+        // Note: this can throw a RuntimeException in the event that no configuration representation can be
+        // (or has been) resolved for the given issuer.
         return representationProvider.getOIDCConfigurationRepresentation(issuer);
     }
 }

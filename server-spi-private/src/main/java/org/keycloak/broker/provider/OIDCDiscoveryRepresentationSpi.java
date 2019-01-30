@@ -18,23 +18,31 @@
 package org.keycloak.broker.provider;
 
 import org.keycloak.provider.Provider;
-
-import org.keycloak.protocol.oidc.representations.OIDCConfigurationRepresentation;
+import org.keycloak.provider.ProviderFactory;
+import org.keycloak.provider.Spi;
 
 /**
- * @author <a href="mailto:james.p.campbell@gmail.com">James Campbell</a>
+ * @author <a href="mailto:james.p.campbell@gmail.com>James Campbell</a>
  */
-public interface OIDCDiscoveryRepresentationProvider extends Provider {
-    /**
-     * Get OIDCConfigurationRepresentation for a given issuer
-     *
-     * @param issuer
-     * @return
-     */
-    OIDCConfigurationRepresentation getOIDCConfigurationRepresentation(String issuer);
+public class OIDCDiscoveryRepresentationSpi implements Spi {
 
-    /**
-     * Clears all the cached representations, so they need to be loaded again
-     */
-    void clearCache();
+    @Override
+    public boolean isInternal() {
+        return true;
+    }
+
+    @Override
+    public String getName() {
+        return "OIDCDiscoveryRepresentationStorage";
+    }
+
+    @Override
+    public Class<? extends Provider> getProviderClass() {
+        return OIDCDiscoveryRepresentationProvider.class;
+    }
+
+    @Override
+    public Class<? extends ProviderFactory> getProviderFactoryClass() {
+        return OIDCDiscoveryRepresentationProviderFactory.class;
+    }
 }
