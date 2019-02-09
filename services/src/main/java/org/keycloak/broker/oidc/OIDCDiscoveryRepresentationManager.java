@@ -38,7 +38,7 @@ public class OIDCDiscoveryRepresentationManager {
         // Note: this can throw a RuntimeException in the event that no configuration representation can be
         // (or has been) resolved for the given issuer.
         logger.debugf("Current OIDC Representation provider is: %s", representationProvider.getClass().getCanonicalName());
-        OIDCConfigurationRepresentation rep = representationProvider.getOIDCConfigurationRepresentation(issuer);
+        OIDCConfigurationRepresentation rep = representationProvider.getOIDCConfigurationRepresentation(issuer, new OIDCDiscoveryRepresentationLoader(session));
         if (rep == null) {
             logger.warnf("Unable to obtain OIDC Configuration for issuer %s", issuer);
             throw new RuntimeException("Unable to obtain OIDC Configuration for issuer" + issuer);

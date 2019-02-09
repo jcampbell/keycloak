@@ -19,8 +19,8 @@ package org.keycloak.models.cache.infinispan.configs;
 
 import org.infinispan.Cache;
 import org.jboss.logging.Logger;
+import org.keycloak.broker.provider.OIDCDiscoveryRepresentationLoader;
 import org.keycloak.broker.provider.OIDCDiscoveryRepresentationProvider;
-import org.keycloak.broker.provider.util.SimpleHttp;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.protocol.oidc.representations.OIDCConfigurationRepresentation;
 
@@ -46,48 +46,34 @@ public class InfinispanOIDCDiscoveryRepresentationProvider implements OIDCDiscov
         this.refreshInterval = refreshInterval;
     }
 
-    public OIDCConfigurationRepresentation getOIDCConfigurationRepresentation(String issuer)
+    public OIDCConfigurationRepresentation getOIDCConfigurationRepresentation(String issuer, OIDCDiscoveryRepresentationLoader loader)
     {
-        OIDCConfigurationRepresentation rep;
+        OIDCConfigurationRepresentation rep = null;
         long currentTime = new Date().getTime();
 
         OIDCDiscoveryRepresentationEntry entry = representationCache.get(issuer);
-
-        if (entry != null) {
-            long lastRequest = entry.getLastRequestTime();
-            if ((currentTime - lastRequest) > this.refreshInterval) {
-                rep = requestRepresentation(issuer);
-                if (rep != null) {
-                    // If our request failed, it's been logged by requestRepresentation, but return the last known
-                    // representation anyway.
-                    return rep;
-                }
-            }
-            rep = entry.getConfigurationRepresentation();
-            return rep;
-        }
-        rep = requestRepresentation(issuer);
-        if (rep == null) {
-            // If no successful configuration has ever been obtained, we need to raise a runtimeexception
-            throw new RuntimeException("Unable to obtain OpenID Configuration for issuer " + issuer);
-        }
-        return rep;
-    }
-
-    private OIDCConfigurationRepresentation requestRepresentation(String issuer) {
         try {
-            SimpleHttp.Response response = SimpleHttp.doGet(issuer + "/.well-known/openid-configuration", session).header("accept", "application/json").asResponse();
-            if ((response.getStatus() == 200) && (response.getFirstHeader("Content-Type").equalsIgnoreCase("application/json"))) {
-                OIDCConfigurationRepresentation rep = response.asJson(OIDCConfigurationRepresentation.class);
-                representationCache.put(issuer, new OIDCDiscoveryRepresentationEntry(new Date().getTime(), rep));
+            if (entry != null) {
+                long lastRequest = entry.getLastRequestTime();
+                if ((currentTime - lastRequest) > this.refreshInterval) {
+                    rep = loader.loadRepresentation(issuer);
+                    representationCache.put(issuer, new OIDCDiscoveryRepresentationEntry(currentTime, rep));
+                } else {
+                    rep = entry.getConfigurationRepresentation();
+                }
+                return rep;
+            }
+            return loader.loadRepresentation(issuer);
+        } catch (IOException e) {
+            logger.warnf("Unable to load OIDC Configuration for issuer: %s.", issuer);
+            logger.debug(e.getMessage());
+        } finally {
+            if (rep != null) {
+                // If our request failed, but we still had a value in cache, return it with the warning in the log.
                 return rep;
             } else {
-                logger.warnf("Invalid status or content-type while retrieving OpenID Connect configuration for issuer %s", issuer);
-                return null;
+                throw new RuntimeException("Unable to obtain OpenID Configuration for issuer " + issuer);
             }
-        } catch (IOException e) {
-            logger.warnf("Error requesting OpenID Connect configuration for issuer %s", issuer);
-            return null;
         }
     }
 
@@ -98,6 +84,5 @@ public class InfinispanOIDCDiscoveryRepresentationProvider implements OIDCDiscov
 
     @Override
     public void close() {
-
     }
 }

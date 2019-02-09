@@ -19,6 +19,7 @@ package org.keycloak.protocol.oidc.representations;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.HashMap;
@@ -27,9 +28,13 @@ import java.util.Map;
 
 /**
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
+ *
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class OIDCConfigurationRepresentation {
 
-public class OIDCConfigurationRepresentation extends OIDCDiscoveryConfigurationRepresentation {
+    @JsonProperty("issuer")
+    private String issuer;
 
     @JsonProperty("authorization_endpoint")
     private String authorizationEndpoint;
@@ -114,6 +119,14 @@ public class OIDCConfigurationRepresentation extends OIDCDiscoveryConfigurationR
     private Boolean tlsClientCertificateBoundAccessTokens;
 
     protected Map<String, Object> otherClaims = new HashMap<String, Object>();
+
+    public String getIssuer() {
+        return issuer;
+    }
+
+    public void setIssuer(String issuer) {
+        this.issuer = issuer;
+    }
 
     public String getAuthorizationEndpoint() {
         return authorizationEndpoint;

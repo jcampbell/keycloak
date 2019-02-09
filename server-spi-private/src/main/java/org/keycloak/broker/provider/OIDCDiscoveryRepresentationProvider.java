@@ -31,7 +31,7 @@ public interface OIDCDiscoveryRepresentationProvider extends Provider {
      * @param issuer
      * @return
      */
-    OIDCConfigurationRepresentation getOIDCConfigurationRepresentation(String issuer);
+    OIDCConfigurationRepresentation getOIDCConfigurationRepresentation(String issuer, OIDCDiscoveryRepresentationLoader loader);
 
     /**
      * Clears all the cached representations, so they need to be loaded again
