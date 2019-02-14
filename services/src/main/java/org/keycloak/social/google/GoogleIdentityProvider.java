@@ -38,7 +38,7 @@ import javax.ws.rs.core.UriBuilder;
  */
 public class GoogleIdentityProvider extends OIDCDiscoveryIdentityProvider implements SocialIdentityProvider<OIDCIdentityProviderConfig> {
 
-    private static final String ISSUER = "https://accounts.google.com";
+    public static final String ISSUER = "https://accounts.google.com";
     
     public static final String DEFAULT_SCOPE = "openid profile email";
 
