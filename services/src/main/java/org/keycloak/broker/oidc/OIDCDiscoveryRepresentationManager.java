@@ -31,14 +31,14 @@ public class OIDCDiscoveryRepresentationManager {
 
     private static final Logger logger = Logger.getLogger(OIDCDiscoveryRepresentationManager.class);
 
-    public static OIDCConfigurationRepresentation getOIDCConfigurationRepresentation(KeycloakSession session, String issuer) {
+    public static OIDCConfigurationRepresentation getOIDCConfigurationRepresentation(KeycloakSession session, String issuer, long cacheTimeout) {
         logger.debug("Attempting to get representation provider: OIDCDiscoveryRepresentationProvider");
 
         OIDCDiscoveryRepresentationProvider representationProvider = session.getProvider(OIDCDiscoveryRepresentationProvider.class);
         // Note: this can throw a RuntimeException in the event that no configuration representation can be
         // (or has been) resolved for the given issuer.
         logger.debugf("Current OIDC Representation provider is: %s", representationProvider.getClass().getCanonicalName());
-        OIDCConfigurationRepresentation rep = representationProvider.getOIDCConfigurationRepresentation(issuer, new OIDCDiscoveryRepresentationLoader(session));
+        OIDCConfigurationRepresentation rep = representationProvider.getOIDCConfigurationRepresentation(issuer, new OIDCDiscoveryRepresentationLoader(session), cacheTimeout);
         if (rep == null) {
             logger.warnf("Unable to obtain OIDC Configuration for issuer %s", issuer);
             throw new RuntimeException("Unable to obtain OIDC Configuration for issuer" + issuer);

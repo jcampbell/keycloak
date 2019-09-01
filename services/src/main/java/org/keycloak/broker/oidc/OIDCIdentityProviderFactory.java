@@ -20,6 +20,7 @@ import org.keycloak.broker.provider.AbstractIdentityProviderFactory;
 import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.protocol.oidc.representations.OIDCConfigurationRepresentation;
+import org.keycloak.protocol.oidc.representations.OIDCDiscoveryConfigurationRepresentation;
 import org.keycloak.util.JsonSerialization;
 
 import java.io.IOException;

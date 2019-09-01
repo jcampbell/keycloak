@@ -40,6 +40,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.UserSessionModel;
+import org.keycloak.protocol.oidc.representations.OIDCConfigurationRepresentation;
 import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.IDToken;
 import org.keycloak.representations.JsonWebToken;
@@ -120,6 +121,29 @@ public class OIDCIdentityProvider extends AbstractOAuth2IdentityProvider<OIDCIde
             return AuthenticationManager.finishBrowserLogout(session, realm, userSession, session.getContext().getUri(), clientConnection, headers);
         }
 
+    }
+
+    /**
+     * Uses the configured OIDCDiscoveryRepresentationProvider to update the configuration for the specified configuration
+     * based on the well-known open-id configuration for the specified issuer.
+     *
+     * @param config The OIDCIdentityProvderConfig to update with the new endpoints
+     * @param issuer The OIDC issuer for this Identity Provider
+     * @param cacheTimeout Check the well-known endpoint the cached value is older than cacheTimeout millis
+     */
+    protected void discoverConfig(OIDCIdentityProviderConfig config, String issuer, long cacheTimeout) {
+        logger.debugf("Getting OIDC Configuration for issuer %s", issuer);
+        OIDCConfigurationRepresentation rep = OIDCDiscoveryRepresentationManager.getOIDCConfigurationRepresentation(session, issuer, cacheTimeout);
+        logger.debugf("Found OIDC Configuration: %s", rep.toString());
+        config.setLogoutUrl(rep.getLogoutEndpoint());
+        config.setAuthorizationUrl(rep.getAuthorizationEndpoint());
+        config.setTokenUrl(rep.getTokenEndpoint());
+        config.setUserInfoUrl(rep.getUserinfoEndpoint());
+        if (rep.getJwksUri() != null) {
+            config.setValidateSignature(true);
+            config.setUseJwksUrl(true);
+            config.setJwksUrl(rep.getJwksUri());
+        }
     }
 
     @Override

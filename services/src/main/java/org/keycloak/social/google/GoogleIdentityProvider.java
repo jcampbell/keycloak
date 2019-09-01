@@ -19,6 +19,7 @@ package org.keycloak.social.google;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.broker.oidc.OIDCDiscoveryIdentityProvider;
+import org.keycloak.broker.oidc.OIDCIdentityProvider;
 import org.keycloak.broker.oidc.OIDCIdentityProviderConfig;
 import org.keycloak.broker.provider.AuthenticationRequest;
 import org.keycloak.broker.provider.BrokeredIdentityContext;
@@ -36,9 +37,10 @@ import javax.ws.rs.core.UriBuilder;
 /**
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
  */
-public class GoogleIdentityProvider extends OIDCDiscoveryIdentityProvider implements SocialIdentityProvider<OIDCIdentityProviderConfig> {
+public class GoogleIdentityProvider extends OIDCIdentityProvider implements SocialIdentityProvider<OIDCIdentityProviderConfig> {
 
-    private static final String ISSUER = "https://accounts.google.com";
+    public static final String ISSUER = "https://accounts.google.com";
+    public static final long configRefreshTimeout = 1000 * 60 * 60 * 24 * 7;
     
     public static final String DEFAULT_SCOPE = "openid profile email";
 
@@ -46,7 +48,7 @@ public class GoogleIdentityProvider extends OIDCDiscoveryIdentityProvider implem
 
     public GoogleIdentityProvider(KeycloakSession session, GoogleIdentityProviderConfig config) {
         super(session, config);
-        discoverConfig(config, ISSUER);
+        discoverConfig(config, ISSUER, configRefreshTimeout);
     }
 
     @Override

@@ -40,22 +40,26 @@ public class InfinispanOIDCDiscoveryRepresentationProvider implements OIDCDiscov
 
     private long refreshInterval;
 
-    public InfinispanOIDCDiscoveryRepresentationProvider(KeycloakSession session, Cache<String, OIDCDiscoveryRepresentationEntry> representationCache, long refreshInterval) {
+    public InfinispanOIDCDiscoveryRepresentationProvider(KeycloakSession session, Cache<String, OIDCDiscoveryRepresentationEntry> representationCache, long cacheTimeout) {
         this.session = session;
         this.representationCache = representationCache;
-        this.refreshInterval = refreshInterval;
+        this.refreshInterval = cacheTimeout;
     }
 
-    public OIDCConfigurationRepresentation getOIDCConfigurationRepresentation(String issuer, OIDCDiscoveryRepresentationLoader loader)
+    public OIDCConfigurationRepresentation getOIDCConfigurationRepresentation(String issuer, OIDCDiscoveryRepresentationLoader loader, long cacheTimeout)
     {
         OIDCConfigurationRepresentation rep = null;
         long currentTime = new Date().getTime();
+        long refreshInterval = cacheTimeout;
+        if (this.refreshInterval < refreshInterval) {
+            refreshInterval = this.refreshInterval;
+        }
 
         OIDCDiscoveryRepresentationEntry entry = representationCache.get(issuer);
         try {
             if (entry != null) {
                 long lastRequest = entry.getLastRequestTime();
-                if ((currentTime - lastRequest) > this.refreshInterval) {
+                if ((currentTime - lastRequest) > refreshInterval) {
                     rep = loader.loadRepresentation(issuer);
                     representationCache.put(issuer, new OIDCDiscoveryRepresentationEntry(currentTime, rep));
                 } else {

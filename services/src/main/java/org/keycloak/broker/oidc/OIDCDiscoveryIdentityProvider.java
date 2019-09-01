@@ -18,8 +18,15 @@
 package org.keycloak.broker.oidc;
 
 import org.jboss.logging.Logger;
+import org.keycloak.models.IdentityProviderModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.protocol.oidc.representations.OIDCConfigurationRepresentation;
+import org.keycloak.protocol.oidc.representations.OIDCDiscoveryConfigurationRepresentation;
+import org.keycloak.util.JsonSerialization;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
 
 /**
  * @author <a href="mailto:james.p.campbell@gmail.com">James Campbell</a>
@@ -32,10 +39,20 @@ public class OIDCDiscoveryIdentityProvider extends OIDCIdentityProvider {
         super(session, config);
     }
 
-    protected void discoverConfig(OIDCIdentityProviderConfig config, String issuer) {
-        logger.debugf("Getting OIDC Configuration for issuer %s", issuer);
-        OIDCConfigurationRepresentation rep = OIDCDiscoveryRepresentationManager.getOIDCConfigurationRepresentation(session, issuer);
-        logger.debugf("Found OIDC Configuration: %s", rep.toString());
+    /* TODO: consider using parseOIDCDiscoveryConfig in the event that someone wants to be able to specify a
+     * configuration based only on the issuer.
+     */
+    protected static Map<String, String> parseOIDCDiscoveryConfig(KeycloakSession session, InputStream inputStream) {
+        OIDCDiscoveryConfigurationRepresentation discoveryRep;
+        try {
+            discoveryRep = JsonSerialization.readValue(inputStream, OIDCDiscoveryConfigurationRepresentation.class);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load openid connect metadata", e);
+        }
+        OIDCIdentityProviderConfig config = new OIDCIdentityProviderConfig(new IdentityProviderModel());
+        OIDCConfigurationRepresentation rep = OIDCDiscoveryRepresentationManager.getOIDCConfigurationRepresentation(session, discoveryRep.getIssuer(), 0);
+
+        config.setIssuer(rep.getIssuer());
         config.setLogoutUrl(rep.getLogoutEndpoint());
         config.setAuthorizationUrl(rep.getAuthorizationEndpoint());
         config.setTokenUrl(rep.getTokenEndpoint());
@@ -45,5 +62,7 @@ public class OIDCDiscoveryIdentityProvider extends OIDCIdentityProvider {
             config.setUseJwksUrl(true);
             config.setJwksUrl(rep.getJwksUri());
         }
+        return config.getConfig();
     }
+
 }
